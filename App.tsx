@@ -1,118 +1,150 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator, NativeStackNavigationOptions, NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+export default () => {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <NavigationContainer>
+      <AppStack />
+    </NavigationContainer>
+  );
+}
+
+type StackAParamList = {
+  Screen1: undefined;
+  Screen2: undefined;
+  ScreenX: undefined;
+};
+
+type StackBParamList = {
+  Screen3: undefined;
+  Screen4: undefined;
+  ScreenX: undefined;
+};
+
+type AppStackParamList = {
+  StackA: {
+    screen: keyof StackAParamList;
+  };
+  StackB: {
+    screen: keyof StackBParamList;
+  };
+};
+
+type AnyStackParamList = StackAParamList & StackBParamList & AppStackParamList;
+
+type ScreenProps<T extends keyof AnyStackParamList> = NativeStackScreenProps<AnyStackParamList, T>;
+
+const AppStackStack = createNativeStackNavigator<AppStackParamList>();
+
+const AppStack: React.FC = () => {
+  return (
+    <AppStackStack.Navigator initialRouteName={'StackA'} screenOptions={{ headerShown: false }}>
+      <AppStackStack.Screen component={StackA} name={'StackA'} />
+      <AppStackStack.Screen component={StackB} name={'StackB'} />
+    </AppStackStack.Navigator>
+  );
+};
+
+const StackAStack = createNativeStackNavigator<StackAParamList>();
+
+const StackA: React.FC = () => {
+  return (
+    <StackAStack.Navigator initialRouteName={'Screen1'} screenOptions={navigationHeaderOptions}>
+      <StackAStack.Screen component={Screen1} name={'Screen1'} />
+      <StackAStack.Screen component={Screen2} name={'Screen2'} />
+      <StackAStack.Screen component={ScreenX} name={'ScreenX'} />
+    </StackAStack.Navigator>
+  );
+};
+
+const StackBStack = createNativeStackNavigator<StackBParamList>();
+
+const StackB: React.FC = () => {
+  return (
+    <StackBStack.Navigator initialRouteName={'Screen3'} screenOptions={navigationHeaderOptions}>
+      <StackBStack.Screen component={Screen3} name={'Screen3'} />
+      <StackBStack.Screen component={Screen4} name={'Screen4'} />
+      <StackBStack.Screen component={ScreenX} name={'ScreenX'} />
+    </StackBStack.Navigator>
+  );
+};
+
+const BackButton = () => {
+  const navigation = useNavigation();
+  return (
+    <Button title='BACK' onPress={() => navigation.goBack()} />
+  );
+};
+
+const navigationHeaderOptions: NativeStackNavigationOptions = {
+  headerLeft: BackButton,
+  headerStyle: {
+    backgroundColor: 'orange',
+  },
+  headerTitleStyle: {
+    color: 'black',
+  },
+  headerTitleAlign: 'center',
+};
+
+const Screen1: React.FC<ScreenProps<'Screen1'>> = ({ navigation }) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Screen1</Text>
+      <Button title='TO SCREEN X' onPress={() => navigation.navigate('ScreenX')} />
+      <Button title='TO SCREEN 2' onPress={() => navigation.navigate('Screen2')} />
     </View>
   );
-}
+};
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
+const Screen2: React.FC<ScreenProps<'Screen2'>> = ({ navigation }) => {
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.text}>Screen2</Text>
+      <Button title='TO SCREEN X' onPress={() => navigation.navigate('ScreenX')} />
+      <Button title='TO SCREEN 3' onPress={() => navigation.navigate('StackB', { screen: 'Screen3' })} />
+    </View>
   );
-}
+};
+
+const ScreenX: React.FC<ScreenProps<'ScreenX'>> = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>ScreenX</Text>
+    </View>
+  );
+};
+
+const Screen3: React.FC<ScreenProps<'Screen3'>> = ({ navigation }) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Screen3</Text>
+      <Button title='TO SCREEN X' onPress={() => navigation.navigate('ScreenX')} />
+      <Button title='TO SCREEN 4' onPress={() => navigation.navigate('Screen4')} />
+    </View>
+  );
+};
+
+const Screen4: React.FC<ScreenProps<'Screen4'>> = ({ navigation }) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Screen4</Text>
+      <Button title='TO SCREEN X' onPress={() => navigation.navigate('ScreenX')} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'black',
+    gap: 16,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  text: {
+    color: 'white',
+  }
 });
-
-export default App;
